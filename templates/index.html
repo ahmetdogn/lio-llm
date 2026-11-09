@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lio-llm</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>lio-llm</h1>
+    <p class="info">
+      Ein kleines Sprachmodell (3,5 Mio. Parameter), das ich selbst programmiert und auf
+      Shakespeare-Texten trainiert habe. Gib einen Anfang ein und das Modell schreibt weiter.
+    </p>
+
+    <label for="prompt">Anfang:</label>
+    <textarea id="prompt" rows="3">ROMEO:</textarea>
+
+    <div class="settings">
+      <div>
+        <label for="temp">Temperatur: <span id="temp-value">0.8</span></label>
+        <input type="range" id="temp" min="0.1" max="2" step="0.1" value="0.8">
+      </div>
+      <div>
+        <label for="tokens">Anzahl Tokens: <span id="tokens-value">150</span></label>
+        <input type="range" id="tokens" min="20" max="500" step="10" value="150">
+      </div>
+    </div>
+
+    <button id="btn" onclick="generate()">Generieren</button>
+
+    <h3>Ausgabe:</h3>
+    <pre id="output">(hier erscheint der Text)</pre>
+
+    <p class="hint">
+      Tipp: Niedrige Temperatur = vorhersehbarer Text, hohe Temperatur = kreativer aber
+      mehr Unsinn. Probier z.B. "JULIET:" oder "KING HENRY:".
+    </p>
+  </div>
+
+  <script>
+    const temp = document.getElementById("temp");
+    const tokens = document.getElementById("tokens");
+    temp.oninput = () => document.getElementById("temp-value").textContent = temp.value;
+    tokens.oninput = () => document.getElementById("tokens-value").textContent = tokens.value;
+
+    async function generate() {
+      const btn = document.getElementById("btn");
+      const output = document.getElementById("output");
+      btn.disabled = true;
+      btn.textContent = "generiert...";
+      output.textContent = "...";
+
+      try {
+        const res = await fetch("/generate", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            prompt: document.getElementById("prompt").value,
+            temperature: temp.value,
+            max_tokens: tokens.value
+          })
+        });
+        const data = await res.json();
+        output.textContent = data.text;
+      } catch (err) {
+        output.textContent = "Fehler: " + err;
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Generieren";
+    }
+  </script>
+</body>
+</html>
