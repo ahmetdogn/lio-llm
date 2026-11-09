@@ -7,6 +7,8 @@ fertige Bibliotheken benutzen. Deshalb habe ich alles selbst geschrieben: den To
 Transformer-Modell, das Training und die Textgenerierung. Als Datensatz habe ich Tiny Shakespeare
 benutzt (ca. 1 MB Text), weil man damit auch ohne GPU in vernünftiger Zeit trainieren kann.
 
+**Demo:** https://lio-llm.vercel.app
+
 ![Screenshot der Weboberfläche](screenshot.png)
 
 ## Was ich umgesetzt habe
@@ -16,7 +18,7 @@ benutzt (ca. 1 MB Text), weil man damit auch ohne GPU in vernünftiger Zeit trai
   Die letzten drei habe ich mir aus dem LLaMA-Paper abgeschaut
 - KV-Cache zum schnelleren Generieren, dazu Temperatur, Top-k und Top-p Sampling
 - Training mit AdamW, Warmup und Cosine Learning Rate
-- eine kleine Weboberfläche mit Flask
+- eine kleine Weboberfläche mit Flask, läuft auf Vercel
 - ein paar Tests mit pytest
 
 ## Ordnerstruktur
@@ -27,13 +29,15 @@ benutzt (ca. 1 MB Text), weil man damit auch ohne GPU in vernünftiger Zeit trai
 - `train.py` - Training
 - `generate.py` - Text generieren
 - `app.py` - Weboberfläche
+- `liollm/numpy_model.py` - das Modell nochmal nur mit numpy (für Vercel)
+- `export_numpy.py` - Gewichte für die numpy-Version exportieren
 
 ## Benutzung
 
-Pakete installieren:
+Pakete installieren (für Training und Tests wird PyTorch gebraucht):
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-train.txt
 ```
 
 Daten vorbereiten (lädt Tiny Shakespeare herunter und trainiert den Tokenizer):
@@ -59,6 +63,15 @@ Oder die Weboberfläche starten und http://localhost:5000 im Browser öffnen:
 ```bash
 python app.py
 ```
+
+## Deployment auf Vercel
+
+PyTorch ist zu groß für Vercel, deshalb gibt es eine zweite Version vom Modell, die nur numpy
+benutzt (`liollm/numpy_model.py`). Für das Generieren braucht man nur den Forward-Pass, das geht
+auch ohne PyTorch. Nach dem Training werden die Gewichte mit `python export_numpy.py` als
+`.npz` gespeichert (in float16, damit die Datei nur ca. 7 MB groß ist).
+
+Ein Test prüft, dass die numpy-Version die gleichen Ausgaben liefert wie das PyTorch-Modell.
 
 ## Ergebnisse
 
