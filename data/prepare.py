@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.append(str(Path(__file__).parent.parent))  # damit liollm gefunden wird
-from liollm import BPETokenizer
+from liollm.tokenizer import BPETokenizer
 
 URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
 DATA_DIR = Path(__file__).parent

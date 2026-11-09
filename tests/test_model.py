@@ -2,7 +2,7 @@ import math
 
 import torch
 
-from liollm import GPT, ModelConfig
+from liollm.model import GPT, ModelConfig
 
 # kleines Modell, damit die Tests schnell laufen
 CFG = ModelConfig(vocab_size=64, block_size=32, n_layer=2, n_head=2, n_embd=32, dropout=0.0)

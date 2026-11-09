@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from liollm import GPT, ModelConfig
+from liollm.model import GPT, ModelConfig
 
 parser = argparse.ArgumentParser()
 # Modell

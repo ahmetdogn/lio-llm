@@ -6,7 +6,8 @@ import argparse
 
 import torch
 
-from liollm import GPT, BPETokenizer, ModelConfig
+from liollm.model import GPT, ModelConfig
+from liollm.tokenizer import BPETokenizer
 
 
 def load_model(ckpt_path="checkpoints/ckpt.pt", tok_path="data/tokenizer.json"):

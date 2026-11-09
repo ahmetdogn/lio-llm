@@ -1,4 +1,4 @@
-from liollm import BPETokenizer
+from liollm.tokenizer import BPETokenizer
 
 TEXT = "Hallo Welt! Hello world, hello world. Größe, Übermut & Emojis 🚀🚀 123456\n" * 20
 
