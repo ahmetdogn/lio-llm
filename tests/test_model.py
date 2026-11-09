@@ -75,3 +75,27 @@ def test_overfitting():
         loss.backward()
         opt.step()
     assert loss.item() < 0.1
+
+
+def test_numpy_version(tmp_path):
+    # die numpy-Version (fuer Vercel) muss das gleiche rausgeben wie das PyTorch-Modell
+    import numpy as np
+
+    from liollm.numpy_model import NumpyGPT
+
+    torch.manual_seed(0)
+    model = GPT(CFG).eval()
+    weights = {k: v.detach().numpy() for k, v in model.state_dict().items()}
+    weights["config"] = np.array([CFG.vocab_size, CFG.block_size, CFG.n_layer, CFG.n_head, CFG.n_embd])
+    np.savez(tmp_path / "m.npz", **weights)
+    np_model = NumpyGPT(tmp_path / "m.npz")
+
+    x = torch.randint(0, 64, (1, 12))
+    with torch.no_grad():
+        full, _ = model(x, x)
+    cache = [None] * CFG.n_layer
+    out = np_model.forward(x[0, :8].tolist(), cache, 0)
+    assert np.allclose(out, full[0, 7].numpy(), atol=1e-4)
+    for t in range(8, 12):
+        out = np_model.forward([int(x[0, t])], cache, t)
+        assert np.allclose(out, full[0, t].numpy(), atol=1e-4)
