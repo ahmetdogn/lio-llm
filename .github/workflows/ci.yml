@@ -11,5 +11,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: pip install numpy regex pytest
+      - run: pip install numpy regex flask pytest
       - run: pytest

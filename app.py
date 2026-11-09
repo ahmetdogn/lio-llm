@@ -1,18 +1,22 @@
-# Kleine Weboberflaeche zum Ausprobieren vom Modell
+# Weboberflaeche zum Ausprobieren vom Modell
 #
-# Starten mit:  python app.py
-# dann im Browser http://localhost:5000 oeffnen
+# Lokal starten mit:  python app.py  (dann http://localhost:5000 oeffnen)
+# Laeuft auch auf Vercel. Dort wird die numpy-Version vom Modell benutzt, weil PyTorch
+# zu gross fuer Vercel ist (siehe liollm/numpy_model.py)
 
-import torch
+from pathlib import Path
+
 from flask import Flask, jsonify, render_template, request
 
-from generate import generate_text, load_model
+from liollm.numpy_model import NumpyGPT
+from liollm.tokenizer import BPETokenizer
+
+BASE = Path(__file__).parent
 
 app = Flask(__name__)
 
-print("lade Modell...")
-model, tok = load_model()
-print("Modell geladen")
+model = NumpyGPT(BASE / "checkpoints" / "model.npz")
+tok = BPETokenizer.load(BASE / "data" / "tokenizer.json")
 
 
 @app.route("/")
@@ -28,13 +32,12 @@ def generate():
         prompt = "\n"
 
     # Werte begrenzen, damit niemand 100000 Tokens anfragt
-    max_tokens = min(int(data.get("max_tokens", 150)), 500)
+    max_tokens = min(int(data.get("max_tokens", 150)), 300)
     temperature = float(data.get("temperature", 0.8))
     temperature = max(0.1, min(temperature, 2.0))
 
-    with torch.no_grad():
-        text = generate_text(model, tok, prompt, max_tokens, temperature)
-    return jsonify({"text": text})
+    ids = model.generate(tok.encode(prompt)[-200:], max_tokens, temperature)
+    return jsonify({"text": tok.decode(ids)})
 
 
 if __name__ == "__main__":
